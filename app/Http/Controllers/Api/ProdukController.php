@@ -22,7 +22,7 @@ class ProdukController extends Controller
         ]);
     }
     
-    public function store(Request $request)
+    public function store(StoreProdukRequest $request)
     {
         $produk = Produk::create($request->validated());
         

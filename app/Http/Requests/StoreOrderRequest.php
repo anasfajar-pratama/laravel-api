@@ -5,8 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
-class StoreProdukRequest extends FormRequest
+class StoreOrderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,19 +23,15 @@ class StoreProdukRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kode_barang' => 'required|string|unique:produks,kode_barang',
-            'nama_barang' => 'required|string|max:255',
-            'harga' => 'required|numeric|min:0',
-            'deskripsi' => 'nullable|string',
-            'stok' => 'required|numeric|min:0',
-            'gambar' => 'nullable|string',
-            'kategori' => 'required|string',
-            'expiredDate' => 'nullable|date',
-            'rating' => 'nullable|numeric|min:0|max:5',
+            'user_id' => 'required|exists:users,id',
+            'shipping_address' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.produk_id' => 'required|exists:produks,id',
+            'items.*.quantity' => 'required|integer|min:1',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
         response()->json([
