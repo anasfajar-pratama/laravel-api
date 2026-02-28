@@ -75,7 +75,6 @@ class OrdersController extends Controller
     public function show($id)
     {
         $Orders = Orders::with('user', 'items.produk')->findOrFail($id);
-        
         return new OrderResource($Orders);
     }
 
