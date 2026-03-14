@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProdukRequest;
 use App\Http\Resources\ProdukResource;
 use Illuminate\Http\Request;
 use App\Models\Produk;
+use Illuminate\Support\Facades\Storage;
 
 class ProdukController extends Controller
 {
@@ -43,6 +44,7 @@ class ProdukController extends Controller
         } 
 
         // $produk = Produk::paginate(10);
+
         $produk = $query->paginate(10);
 
         return response()->json([
@@ -59,13 +61,29 @@ class ProdukController extends Controller
                 'last_page_url' => $produk->url($produk->lastPage()),
                 'next_page_url' => $produk->nextPageUrl(),
                 'prev_page_url' => $produk->previousPageUrl(),
+
+                'from' => $produk->firstItem(),
+                'to' => $produk->lastItem()
             ]
         ]);
     }
     
     public function store(StoreProdukRequest $request)
     {
-        $produk = Produk::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('gambar')) {
+
+            $file = $request->file('gambar');
+
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            $path = $file->storeAs('produk', $filename, 'public');
+
+            $data['gambar'] = $path;
+        }
+
+        $produk = Produk::create($data);
         
         return response()->json([
             'success' => true,
@@ -87,7 +105,29 @@ class ProdukController extends Controller
     public function update(StoreProdukRequest $request, $id)
     {
         $produk = Produk::findOrFail($id);
-        $produk->update($request->validated());
+        $data = $request->validated();
+
+        if (empty($data)) {
+            return response()->json([
+                'message' => 'Tidak ada data yang diupdate'
+            ]);
+        }
+       
+        // cek apakah ada gambar baru
+        if ($request->hasFile('gambar')) {
+
+            // hapus gambar lama jika ada
+            if ($produk->gambar) {
+                Storage::disk('public')->delete($produk->gambar);
+            }
+
+            // simpan gambar baru
+            $path = $request->file('gambar')->store('produk', 'public');
+
+            $data['gambar'] = $path;
+        }
+
+        $produk->update($data);
 
         return response()->json([
             'success' => true,
@@ -99,6 +139,11 @@ class ProdukController extends Controller
     public function destroy($id)
     {
         $produk = Produk::findOrFail($id);
+
+        if ($produk->gambar) {
+            Storage::disk('public')->delete($produk->gambar);
+        }
+
         $produk->delete();
 
         return response()->json([
