@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ProdukImage;
 
 class Produk extends Model
 {
@@ -17,4 +18,10 @@ class Produk extends Model
         'expiredDate',
         'rating',
     ];
+
+    public function images()
+    {
+        return $this->hasMany(ProdukImage::class);
+    }
+
 }
