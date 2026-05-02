@@ -3,37 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserApi;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserApiController extends Controller
 {
     public function index()
     {
-        return response()->json(UserApi::all());
+        return response()->json(User::all());
     }
 
     public function store(Request $request)
     {
-        $user = UserApi::create($request->all());
+        $user = User::create($request->all());
         return response()->json($user, 201);
     }
 
     public function show($id)
     {
-        return response()->json(UserApi::findOrFail($id));
+        return response()->json(User::findOrFail($id));
     }
 
     public function update(Request $request, $id)
     {
-        $user = UserApi::findOrFail($id);
+        $user = User::findOrFail($id);
         $user->update($request->all());
         return response()->json($user);
     }
 
     public function destroy($id)
     {
-        UserApi::destroy($id);
+        User::destroy($id);
         return response()->json(['message' => 'Data berhasil dihapus']);
     }
 }
