@@ -50,6 +50,7 @@ class ProdukController extends Controller
         // $produk = Produk::paginate(10);
 
         $produk = $query->paginate(10);
+        // $produk = $query->get();
 
         return response()->json([
             'success' => true,
