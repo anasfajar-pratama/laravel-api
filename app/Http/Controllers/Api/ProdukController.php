@@ -112,7 +112,6 @@ class ProdukController extends Controller
             'success' => true,
             'data' => new ProdukResource($produk)
         ]);
-
     }
 
     public function update(StoreProdukRequest $request, $id)
