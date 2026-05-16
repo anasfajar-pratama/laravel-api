@@ -24,50 +24,65 @@ class OrdersController extends Controller
     public function store(StoreOrderRequest $request)
     {
         DB::beginTransaction();
-        
+
         try {
-            $Orders = Orders::create([
-                'user_id' => $request->user_id,
-                'order_code' => 'ORD' . time(),
-                'total_price' => 0,
-                'shipping_address' => $request->shipping_address,
-                'status' => 'pending'
+            $discount = 0;
+            $discountAmount = 0;
+
+            // Cek apakah ada pelanggan member → dapat diskon 5%
+            if ($request->pelanggan_id) {
+                $discount = 5;
+            }
+
+            $order = Orders::create([
+                'user_id'         => $request->user_id,
+                'pelanggan_id'    => $request->pelanggan_id,
+                'order_code'      => 'ORD' . time(),
+                'total_price'     => 0,
+                'discount'        => $discount,
+                'discount_amount' => 0,
+                'shipping_address'=> $request->shipping_address,
+                'status'          => 'pending',
             ]);
 
-            $total = 0;
+            $subtotalBefore = 0;
 
             foreach ($request->items as $item) {
                 $produk = Produk::findOrFail($item['produk_id']);
                 $subtotal = $produk->harga * $item['quantity'];
-                $total += $subtotal;
+                $subtotalBefore += $subtotal;
 
                 OrderItem::create([
-                    'order_id' => $Orders->id,
+                    'order_id'  => $order->id,
                     'produk_id' => $produk->id,
-                    'quantity' => $item['quantity'],
-                    'price' => $produk->harga,
-                    'subtotal' => $subtotal
+                    'quantity'  => $item['quantity'],
+                    'price'     => $produk->harga,
+                    'subtotal'  => $subtotal,
                 ]);
             }
 
-            $Orders->update([
-                'total_price' => $total
+            $discountAmount = $subtotalBefore * ($discount / 100);
+            $totalAfterDiscount = $subtotalBefore - $discountAmount;
+
+            $order->update([
+                'total_price'     => $totalAfterDiscount,
+                'discount_amount' => $discountAmount,
             ]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Orders berhasil dibuat',
-                'data' => new OrderResource($Orders->load('user', 'items.produk'))
+                'message' => 'Order berhasil dibuat',
+                'data'    => new OrderResource($order->load('user', 'pelanggan', 'items.produk')),
             ], 201);
 
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat Orders',
-                'error' => $e->getMessage()
+                'message' => 'Gagal membuat order',
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }

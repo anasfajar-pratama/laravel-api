@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProdukController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserApiController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\PelangganController;
 
 use Illuminate\Http\Request;
 
@@ -29,3 +30,10 @@ Route::middleware('auth:sanctum')->group(function() {
 Route::get('/', function () {
     return 'API sukses';
 });
+
+// Pelanggan
+Route::get('/pelanggan', [PelangganController::class, 'index']);
+Route::post('/pelanggan', [PelangganController::class, 'store']);
+Route::get('/pelanggan/phone/{no_hp}', [PelangganController::class, 'findByPhone']);
+Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
+Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
