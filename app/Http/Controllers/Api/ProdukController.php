@@ -49,27 +49,27 @@ class ProdukController extends Controller
 
         // $produk = Produk::paginate(10);
 
-        $produk = $query->paginate(10);
-        // $produk = $query->get();
+        // $produk = $query->paginate(10);
+        $produk = $query->get();
 
         return response()->json([
             'success' => true,
             'message' => 'List Produk',
             'data' => ProdukResource::collection($produk),
-            'pagination' => [
-                'current_page' => $produk->currentPage(),
-                'last_page' => $produk->lastPage(),
-                'per_page' => $produk->perPage(),
-                'total' => $produk->total(),
+            // 'pagination' => [
+            //     'current_page' => $produk->currentPage(),
+            //     'last_page' => $produk->lastPage(),
+            //     'per_page' => $produk->perPage(),
+            //     'total' => $produk->total(),
 
-                'first_page_url' => $produk->url(1),
-                'last_page_url' => $produk->url($produk->lastPage()),
-                'next_page_url' => $produk->nextPageUrl(),
-                'prev_page_url' => $produk->previousPageUrl(),
+            //     'first_page_url' => $produk->url(1),
+            //     'last_page_url' => $produk->url($produk->lastPage()),
+            //     'next_page_url' => $produk->nextPageUrl(),
+            //     'prev_page_url' => $produk->previousPageUrl(),
 
-                'from' => $produk->firstItem(),
-                'to' => $produk->lastItem()
-            ]
+            //     'from' => $produk->firstItem(),
+            //     'to' => $produk->lastItem()
+            // ]
         ]);
     }
 
