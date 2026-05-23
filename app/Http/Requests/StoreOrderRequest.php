@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Requests/StoreOrderRequest.php
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -7,14 +7,10 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 class StoreOrderRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -23,11 +19,12 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id',
+            'user_id'          => 'required|integer|exists:users,id',
             'shipping_address' => 'required|string',
-            'items' => 'required|array|min:1',
-            'items.*.produk_id' => 'required|exists:produks,id',
-            'items.*.quantity' => 'required|integer|min:1'
+            'pelanggan_id'     => 'nullable|integer|exists:pelanggan,id',
+            'items'            => 'required|array|min:1',
+            'items.*.produk_id'=> 'required|integer|exists:produks,id',
+            'items.*.quantity' => 'required|integer|min:1',
         ];
     }
 
@@ -41,5 +38,15 @@ class StoreOrderRequest extends FormRequest
                 ], 422
             )
         );
+    }
+    
+    public function messages(): array
+    {
+        return [
+            'user_id.exists'           => 'User tidak ditemukan',
+            'items.required'           => 'Keranjang belanja kosong',
+            'items.*.produk_id.exists' => 'Produk tidak ditemukan',
+            'items.*.quantity.min'     => 'Jumlah minimal 1',
+        ];
     }
 }
