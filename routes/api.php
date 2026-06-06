@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\PelangganController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\PembelianController;
+use App\Http\Controllers\Api\ProfilController;
 
 use Illuminate\Http\Request;
 
@@ -48,6 +49,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pembelians/{pembelian}', [PembelianController::class, 'show']);
     Route::patch('/pembelians/{pembelian}/status', [PembelianController::class, 'updateStatus']);
     Route::delete('/pembelians/{pembelian}', [PembelianController::class, 'destroy']);
+
+    // Profil
+    Route::get('/profil', [ProfilController::class, 'show']);
+    Route::put('/profil', [ProfilController::class, 'update']);
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword']);
+    Route::post('/profil/foto', [ProfilController::class, 'uploadFoto']);
 });
 
 Route::get('/', function () {
