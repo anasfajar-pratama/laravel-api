@@ -26,7 +26,11 @@ class ProfilController extends Controller
             'no_hp' => 'nullable|string|max:20',
         ]);
 
-        $user->update($validated);
+        // Direct assignment agar bypass $fillable di User model
+        $user->name  = $validated['name'];
+        $user->email = $validated['email'];
+        $user->no_hp = $validated['no_hp'] ?? $user->no_hp;
+        $user->save();
 
         return response()->json([
             'data'    => $user->fresh(),
@@ -50,7 +54,8 @@ class ProfilController extends Controller
             ], 422);
         }
 
-        $user->update(['password' => Hash::make($request->password)]);
+        $user->password = Hash::make($request->password);
+        $user->save();
 
         return response()->json(['message' => 'Password berhasil diubah']);
     }
@@ -65,20 +70,21 @@ class ProfilController extends Controller
 
         // Hapus foto lama jika ada
         if ($user->foto) {
-            // Ekstrak path relatif dari URL apapun (bisa localhost, domain produksi, dll)
-            $parsed   = parse_url($user->foto);
-            $oldPath  = ltrim(str_replace('/storage/', '', $parsed['path'] ?? ''), '/');
+            $parsed  = parse_url($user->foto);
+            $oldPath = ltrim(str_replace('/storage/', '', $parsed['path'] ?? ''), '/');
             if ($oldPath) {
                 Storage::disk('public')->delete($oldPath);
             }
         }
 
         $path = $request->file('foto')->store('foto-profil', 'public');
-        // Gunakan url() helper agar mengikuti host request yang sebenarnya
-        // (bukan APP_URL di .env yang mungkin masih 'localhost')
+
+        // url() mengikuti host request yang sebenarnya, bukan APP_URL di .env
         $url = url('storage/' . $path);
 
-        $user->update(['foto' => $url]);
+        // Direct assignment agar bypass $fillable
+        $user->foto = $url;
+        $user->save();
 
         return response()->json([
             'data'    => ['foto' => $url],
